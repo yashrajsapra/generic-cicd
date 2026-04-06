@@ -4,6 +4,9 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
   pipeline:
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/cicd-pipeline.yml
     with:
       pr-number: ${{ github.event.number }}
