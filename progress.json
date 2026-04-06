@@ -1,4 +1,4 @@
-﻿{
+{
     "project":  "generic-cicd",
     "branch":  "feat/generic-cicd-pipeline",
     "base":  "main",
@@ -100,8 +100,8 @@
                                          "id":  "4.1",
                                          "title":  "Code review script (claude + gstack-review)",
                                          "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
+                                         "status":  "completed",
+                                         "notes":  "scripts/code-review.sh created: guards for missing ANTHROPIC_API_KEY/PR_NUMBER, fetches diff via pr-diff.sh, truncates at MAX_DIFF_CHARS, runs claude -p --output-format text, posts via pr-comment.sh, BLOCKING mode exits 1 on BLOCKER/HIGH severity"
                                      },
                                      {
                                          "id":  "4.2",
