@@ -97,8 +97,6 @@ jobs:
     continue-on-error: ${{ inputs.blocking == false }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install claude CLI
-        run: npm install -g @anthropic-ai/claude-code --quiet
       - name: Run code review
         env:
           CONFIG_PATH: ${{ inputs.config-path }}
