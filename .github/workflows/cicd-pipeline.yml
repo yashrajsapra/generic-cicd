@@ -1,4 +1,4 @@
-﻿# GitHub Reusable Workflow — generic-cicd
+﻿# GitHub Reusable Workflow - generic-cicd
 # Callers reference this as:
 #   uses: yashrajsapra/generic-cicd/.github/workflows/cicd-pipeline.yml@main
 # (This file is also copied to .github/workflows/cicd-pipeline.yml in this repo
@@ -35,7 +35,9 @@ jobs:
           PR_NUMBER: ${{ inputs.pr-number }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || scripts/detect-stack.sh lint)
+          STACK_CMD=$(scripts/detect-stack.sh --command lint)
+          CONFIG_CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || true)
+          CMD=${CONFIG_CMD:-$STACK_CMD}
           scripts/run-stage.sh lint "$CMD"
 
   security-scan:
@@ -59,7 +61,9 @@ jobs:
           PR_NUMBER: ${{ inputs.pr-number }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || scripts/detect-stack.sh test)
+          STACK_CMD=$(scripts/detect-stack.sh --command test)
+          CONFIG_CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || true)
+          CMD=${CONFIG_CMD:-$STACK_CMD}
           scripts/run-stage.sh test "$CMD"
 
   build:
@@ -73,7 +77,9 @@ jobs:
           PR_NUMBER: ${{ inputs.pr-number }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || scripts/detect-stack.sh build)
+          STACK_CMD=$(scripts/detect-stack.sh --command build)
+          CONFIG_CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || true)
+          CMD=${CONFIG_CMD:-$STACK_CMD}
           scripts/run-stage.sh build "$CMD"
 
   code-review:

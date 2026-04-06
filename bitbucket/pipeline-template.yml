@@ -1,4 +1,4 @@
-﻿# Generic CI/CD Pipeline — Bitbucket Pipelines Template
+﻿# Generic CI/CD Pipeline - Bitbucket Pipelines Template
 # Triggered on all pull requests. Import this via your bitbucket-pipelines.yml.
 # Required repository variables: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
 # Optional: CICD_CONFIG_PATH (default: .cicd/config.yml)
@@ -11,7 +11,11 @@ definitions:
         script:
           - apt-get update -qq && apt-get install -y -qq python3 python3-pip
           - chmod +x scripts/*.sh
-          - scripts/run-stage.sh lint "$(scripts/load-config.sh stages.lint.command 2>/dev/null || scripts/detect-stack.sh --command lint)"
+          - |
+            STACK_CMD=$(scripts/detect-stack.sh --command lint)
+            CONFIG_CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || true)
+            CMD=${CONFIG_CMD:-$STACK_CMD}
+            scripts/run-stage.sh lint "$CMD"
 
     - step: &security-scan
         name: Security Scan
@@ -26,14 +30,22 @@ definitions:
         image: ubuntu:22.04
         script:
           - chmod +x scripts/*.sh
-          - scripts/run-stage.sh test "$(scripts/load-config.sh stages.test.command 2>/dev/null || scripts/detect-stack.sh --command test)"
+          - |
+            STACK_CMD=$(scripts/detect-stack.sh --command test)
+            CONFIG_CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || true)
+            CMD=${CONFIG_CMD:-$STACK_CMD}
+            scripts/run-stage.sh test "$CMD"
 
     - step: &build
         name: Build
         image: ubuntu:22.04
         script:
           - chmod +x scripts/*.sh
-          - scripts/run-stage.sh build "$(scripts/load-config.sh stages.build.command 2>/dev/null || scripts/detect-stack.sh --command build)"
+          - |
+            STACK_CMD=$(scripts/detect-stack.sh --command build)
+            CONFIG_CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || true)
+            CMD=${CONFIG_CMD:-$STACK_CMD}
+            scripts/run-stage.sh build "$CMD"
 
     - step: &code-review
         name: Code Review
