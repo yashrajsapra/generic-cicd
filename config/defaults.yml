@@ -1,0 +1,30 @@
+# Default configuration for all CI/CD stages.
+# Override any key in your repo's .cicd/config.yml.
+stages:
+  lint:
+    enabled: true
+    command: ""           # auto-detected from stack if empty
+
+  test:
+    enabled: true
+    command: ""           # auto-detected from stack if empty
+
+  build:
+    enabled: true
+    command: ""           # auto-detected from stack if empty
+
+  security-scan:
+    enabled: true
+
+  code-review:
+    enabled: true
+    blocking: false       # true = fail PR when BLOCKER/HIGH severity found
+    model: "claude-sonnet-4-6"
+
+  deploy-preview:
+    enabled: false
+    command: ""
+
+hooks: {}               # pattern: {stage}.pre / {stage}.post → path to hook script
+
+env: {}                 # extra env vars injected into every stage

@@ -1,0 +1,76 @@
+# Generic CI/CD Pipeline - Bitbucket Pipelines Template
+# Triggered on all pull requests. Import this via your bitbucket-pipelines.yml.
+# Required repository variables: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+# Optional: CICD_CONFIG_PATH (default: .cicd/config.yml)
+
+definitions:
+  steps:
+    - step: &lint
+        name: Lint
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - STACK_CMD=$(scripts/detect-stack.sh --command lint)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh lint "$CMD"
+
+    - step: &security-scan
+        name: Security Scan
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - scripts/security-scan.sh
+
+    - step: &test
+        name: Test
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - STACK_CMD=$(scripts/detect-stack.sh --command test)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh test "$CMD"
+
+    - step: &build
+        name: Build
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - STACK_CMD=$(scripts/detect-stack.sh --command build)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh build "$CMD"
+
+    - step: &code-review
+        name: Code Review
+        image: node:20
+        # Required repo vars: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+        # Optional: BLOCKING=true to fail build on high-severity issues
+        script:
+          - npm install -g @anthropic-ai/claude-code --quiet
+          - chmod +x scripts/*.sh
+          - export PR_NUMBER=$BITBUCKET_PR_ID
+          - scripts/code-review.sh
+        after-script:
+          - echo "Code review complete (non-blocking by default)"
+
+    - step: &deploy-preview
+        name: Deploy Preview
+        image: ubuntu:22.04
+        trigger: manual
+        # Set stages.deploy-preview.command in .cicd/config.yml to enable
+        script:
+          - chmod +x scripts/*.sh
+          - DEPLOY_CMD=$(scripts/load-config.sh stages.deploy-preview.command 2>/dev/null || echo "")
+          - if [ -z "$DEPLOY_CMD" ]; then echo "deploy-preview.command not set"; exit 0; fi
+          - scripts/run-stage.sh deploy-preview "$DEPLOY_CMD"
+
+pull-requests:
+  '**':
+    - parallel:
+        - step: *lint
+        - step: *security-scan
+    - step: *test
+    - step: *build
+    - step: *code-review
