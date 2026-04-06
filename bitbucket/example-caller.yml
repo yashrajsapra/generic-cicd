@@ -1,34 +1,25 @@
-﻿# Copy this file to bitbucket-pipelines.yml in your repo.
-# Set repository variables: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
-# Optionally add .cicd/config.yml to customize stages.
-#
-# This pipeline imports steps from yashrajsapra/generic-cicd.
-# For full docs: https://github.com/yashrajsapra/generic-cicd
+# Copy to bitbucket-pipelines.yml in your repo.
+# Set repo vars: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+# Docs: https://github.com/yashrajsapra/generic-cicd
 
 image: ubuntu:22.04
 
-clone:
-  depth: full
-
-definitions:
-  steps:
-    - step: &lint
-        name: Lint
-        script: [ chmod +x scripts/*.sh, scripts/run-stage.sh lint "" ]
-    - step: &test
-        name: Test
-        script: [ chmod +x scripts/*.sh, scripts/run-stage.sh test "" ]
-    - step: &build
-        name: Build
-        script: [ chmod +x scripts/*.sh, scripts/run-stage.sh build "" ]
-    - step: &review
-        name: Code Review
-        image: node:20
-        script: [ npm i -g @anthropic-ai/claude-code -q, chmod +x scripts/*.sh, scripts/code-review.sh ]
-
 pull-requests:
   '**':
-    - step: *lint
-    - step: *test
-    - step: *build
-    - step: *review
+    - parallel:
+        - step:
+            name: Lint
+            script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command lint); scripts/run-stage.sh lint "$CMD"' ]
+        - step:
+            name: Security Scan
+            script: [ chmod +x scripts/*.sh, scripts/security-scan.sh ]
+    - step:
+        name: Test
+        script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command test); scripts/run-stage.sh test "$CMD"' ]
+    - step:
+        name: Build
+        script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command build); scripts/run-stage.sh build "$CMD"' ]
+    - step:
+        name: Code Review
+        image: node:20
+        script: [ npm i -g @anthropic-ai/claude-code -q, chmod +x scripts/*.sh, export PR_NUMBER=$BITBUCKET_PR_ID, scripts/code-review.sh ]
