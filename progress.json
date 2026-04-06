@@ -80,8 +80,8 @@
                                          "id":  "3.2",
                                          "title":  "Security scan stage",
                                          "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
+                                         "status":  "completed",
+                                         "notes":  "scripts/security-scan.sh created: gitleaks secret scanning (auto-install via apt-get fallback) + stack-aware dependency audit (npm audit/pip-audit/go mod verify/dotnet list package --vulnerable); non-fatal on missing tools"
                                      },
                                      {
                                          "id":  "3.V",
