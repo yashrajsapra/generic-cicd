@@ -1,54 +1,150 @@
-{
-  "project": "generic-cicd",
-  "branch": "feat/generic-cicd-pipeline",
-  "base": "main",
-  "updated": "2026-04-07",
-  "phases": [
-    {
-      "id": "phase-1",
-      "name": "Foundation — Scripts + Provider Abstraction",
-      "tasks": [
-        { "id": "1.1", "title": "Repo skeleton + provider detection", "type": "work", "status": "completed", "notes": "detect-provider.sh + detect-stack.sh created, chmod+x, README added" },
-        { "id": "1.2", "title": "Config loader", "type": "work", "status": "completed", "notes": "scripts/load-config.sh (yq + python3/PyYAML fallback deep-merge), config/defaults.yml committed" },
-        { "id": "1.3", "title": "Stage runner + PR abstraction layer", "type": "work", "status": "completed", "notes": "scripts/run-stage.sh (pre/post hooks, exit-code passthrough), scripts/pr-diff.sh (gh/BB curl), scripts/pr-comment.sh (gh pr comment/BB REST POST)" },
-        { "id": "1.V", "title": "VERIFY: Phase 1 — Foundation", "type": "verify", "status": "completed", "notes": "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1–1.3 committed on feat/generic-cicd-pipeline." }
-      ]
-    },
-    {
-      "id": "phase-2",
-      "name": "Provider Workflow Files",
-      "tasks": [
-        { "id": "2.1", "title": "GitHub reusable workflow", "type": "work", "status": "pending", "notes": "" },
-        { "id": "2.2", "title": "Bitbucket pipeline template", "type": "work", "status": "pending", "notes": "" },
-        { "id": "2.V", "title": "VERIFY: Phase 2 — Provider Workflows", "type": "verify", "status": "pending", "notes": "" }
-      ]
-    },
-    {
-      "id": "phase-3",
-      "name": "Core CI Stages",
-      "tasks": [
-        { "id": "3.1", "title": "Lint, Test, Build stages", "type": "work", "status": "pending", "notes": "" },
-        { "id": "3.2", "title": "Security scan stage", "type": "work", "status": "pending", "notes": "" },
-        { "id": "3.V", "title": "VERIFY: Phase 3 — Core Stages", "type": "verify", "status": "pending", "notes": "" }
-      ]
-    },
-    {
-      "id": "phase-4",
-      "name": "Code Review Stage",
-      "tasks": [
-        { "id": "4.1", "title": "Code review script (claude + gstack-review)", "type": "work", "status": "pending", "notes": "" },
-        { "id": "4.2", "title": "Wire code review into both providers", "type": "work", "status": "pending", "notes": "" },
-        { "id": "4.V", "title": "VERIFY: Phase 4 — Code Review", "type": "verify", "status": "pending", "notes": "" }
-      ]
-    },
-    {
-      "id": "phase-5",
-      "name": "Extensibility + Documentation",
-      "tasks": [
-        { "id": "5.1", "title": "Deploy-preview stage + hook finalization", "type": "work", "status": "pending", "notes": "" },
-        { "id": "5.2", "title": "Caller templates + full docs", "type": "work", "status": "pending", "notes": "" },
-        { "id": "5.V", "title": "VERIFY: Phase 5 — End-to-End", "type": "verify", "status": "pending", "notes": "" }
-      ]
-    }
-  ]
+﻿{
+    "project":  "generic-cicd",
+    "branch":  "feat/generic-cicd-pipeline",
+    "base":  "main",
+    "updated":  "2026-04-07",
+    "phases":  [
+                   {
+                       "id":  "phase-1",
+                       "name":  "Foundation â€” Scripts + Provider Abstraction",
+                       "tasks":  [
+                                     {
+                                         "id":  "1.1",
+                                         "title":  "Repo skeleton + provider detection",
+                                         "type":  "work",
+                                         "status":  "completed",
+                                         "notes":  "detect-provider.sh + detect-stack.sh created, chmod+x, README added"
+                                     },
+                                     {
+                                         "id":  "1.2",
+                                         "title":  "Config loader",
+                                         "type":  "work",
+                                         "status":  "completed",
+                                         "notes":  "scripts/load-config.sh (yq + python3/PyYAML fallback deep-merge), config/defaults.yml committed"
+                                     },
+                                     {
+                                         "id":  "1.3",
+                                         "title":  "Stage runner + PR abstraction layer",
+                                         "type":  "work",
+                                         "status":  "completed",
+                                         "notes":  "scripts/run-stage.sh (pre/post hooks, exit-code passthrough), scripts/pr-diff.sh (gh/BB curl), scripts/pr-comment.sh (gh pr comment/BB REST POST)"
+                                     },
+                                     {
+                                         "id":  "1.V",
+                                         "title":  "VERIFY: Phase 1 â€” Foundation",
+                                         "type":  "verify",
+                                         "status":  "completed",
+                                         "notes":  "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1â€“1.3 committed on feat/generic-cicd-pipeline."
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-2",
+                       "name":  "Provider Workflow Files",
+                       "tasks":  [
+                                     {
+                                         "id":  "2.1",
+                                         "title":  "GitHub reusable workflow",
+                                         "type":  "work",
+                                         "status":  "completed",
+                                         "notes":  "github/cicd-pipeline.yml + .github/workflows/cicd-pipeline.yml (copy) + github/example-caller.yml created; reusable workflow_call with lint/security-scan/test/build/code-review/deploy-preview jobs"
+                                     },
+                                     {
+                                         "id":  "2.2",
+                                         "title":  "Bitbucket pipeline template",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "2.V",
+                                         "title":  "VERIFY: Phase 2 â€” Provider Workflows",
+                                         "type":  "verify",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-3",
+                       "name":  "Core CI Stages",
+                       "tasks":  [
+                                     {
+                                         "id":  "3.1",
+                                         "title":  "Lint, Test, Build stages",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "3.2",
+                                         "title":  "Security scan stage",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "3.V",
+                                         "title":  "VERIFY: Phase 3 â€” Core Stages",
+                                         "type":  "verify",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-4",
+                       "name":  "Code Review Stage",
+                       "tasks":  [
+                                     {
+                                         "id":  "4.1",
+                                         "title":  "Code review script (claude + gstack-review)",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "4.2",
+                                         "title":  "Wire code review into both providers",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "4.V",
+                                         "title":  "VERIFY: Phase 4 â€” Code Review",
+                                         "type":  "verify",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-5",
+                       "name":  "Extensibility + Documentation",
+                       "tasks":  [
+                                     {
+                                         "id":  "5.1",
+                                         "title":  "Deploy-preview stage + hook finalization",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "5.2",
+                                         "title":  "Caller templates + full docs",
+                                         "type":  "work",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "5.V",
+                                         "title":  "VERIFY: Phase 5 â€” End-to-End",
+                                         "type":  "verify",
+                                         "status":  "pending",
+                                         "notes":  ""
+                                     }
+                                 ]
+                   }
+               ]
 }
