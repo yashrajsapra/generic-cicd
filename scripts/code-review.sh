@@ -54,35 +54,36 @@ if [ "$DIFF_SIZE" -gt "$MAX_DIFF_CHARS" ]; then
   mv "${DIFF_FILE}.tmp" "$DIFF_FILE"
 fi
 
-DIFF_CONTENT=$(cat "$DIFF_FILE")
-
 # --- Call Anthropic API ---
 echo "Running code review via Anthropic API..."
 
-REVIEW_PROMPT="You are a code reviewer. Review the following git diff for a pull request.
+RESPONSE_FILE="/tmp/cicd-response-$$.json"
 
-Check for:
-- Security issues (hardcoded secrets, injection vulnerabilities, unsafe operations)
-- Logic errors or bugs
-- Code quality issues (clarity, maintainability, duplication)
-- Missing error handling
-- Test coverage gaps
-
-For each issue found, use this format:
-**[SEVERITY: BLOCKER|HIGH|MEDIUM|LOW]** \`path/to/file:line\` — Description
-
-At the end provide:
-- **Summary:** 1-2 sentence overall assessment
-- **Verdict:** APPROVED | CHANGES NEEDED | BLOCKED
-
---- PR DIFF ---
-${DIFF_CONTENT}"
-
-# Build JSON payload using python3 (handles escaping reliably)
-python3 - <<PYEOF
+# Build JSON payload — Python reads diff from file (avoids shell-escaping the diff into Python source)
+python3 - "$DIFF_FILE" "$PAYLOAD_FILE" <<'PYEOF'
 import json, sys
 
-prompt = """${REVIEW_PROMPT}"""
+diff_file, payload_file = sys.argv[1], sys.argv[2]
+
+with open(diff_file, "r", errors="replace") as f:
+    diff_content = f.read()
+
+prompt = (
+    "You are a code reviewer. Review the following git diff for a pull request.\n\n"
+    "Check for:\n"
+    "- Security issues (hardcoded secrets, injection vulnerabilities, unsafe operations)\n"
+    "- Logic errors or bugs\n"
+    "- Code quality issues (clarity, maintainability, duplication)\n"
+    "- Missing error handling\n"
+    "- Test coverage gaps\n\n"
+    "For each issue found, use this format:\n"
+    "**[SEVERITY: BLOCKER|HIGH|MEDIUM|LOW]** `path/to/file:line` — Description\n\n"
+    "At the end provide:\n"
+    "- **Summary:** 1-2 sentence overall assessment\n"
+    "- **Verdict:** APPROVED | CHANGES NEEDED | BLOCKED\n\n"
+    "--- PR DIFF ---\n"
+    + diff_content
+)
 
 payload = {
     "model": "claude-sonnet-4-6",
@@ -90,28 +91,37 @@ payload = {
     "messages": [{"role": "user", "content": prompt}]
 }
 
-with open("${PAYLOAD_FILE}", "w") as f:
+with open(payload_file, "w") as f:
     json.dump(payload, f)
 PYEOF
 
-RESPONSE=$(curl -sf https://api.anthropic.com/v1/messages \
+curl -sf https://api.anthropic.com/v1/messages \
   -H "x-api-key: ${ANTHROPIC_API_KEY}" \
   -H "anthropic-version: 2023-06-01" \
   -H "content-type: application/json" \
-  -d @"${PAYLOAD_FILE}" 2>/dev/null) || {
+  -d @"${PAYLOAD_FILE}" \
+  -o "$RESPONSE_FILE" 2>/dev/null || {
   echo "⚠ Anthropic API call failed — skipping review"
-  rm -f "$DIFF_FILE" "$PAYLOAD_FILE"
+  rm -f "$DIFF_FILE" "$PAYLOAD_FILE" "$RESPONSE_FILE"
   exit 0
 }
 
-# Extract text from response
-python3 - <<PYEOF
+# Extract text from response — Python reads from file (avoids embedding JSON in Python source)
+python3 - "$RESPONSE_FILE" "$REVIEW_FILE" <<'PYEOF'
 import json, sys
 
-response = json.loads("""${RESPONSE}""")
-text = response.get("content", [{}])[0].get("text", "⚠ No review content returned")
+response_file, review_file = sys.argv[1], sys.argv[2]
 
-with open("${REVIEW_FILE}", "w") as f:
+with open(response_file, "r") as f:
+    response = json.load(f)
+
+# Check for API error response
+if "error" in response:
+    text = f"⚠ API error: {response['error'].get('message', 'unknown error')}"
+else:
+    text = response.get("content", [{}])[0].get("text", "⚠ No review content returned")
+
+with open(review_file, "w") as f:
     f.write("## Automated Code Review\n\n")
     f.write(text)
 PYEOF
@@ -127,11 +137,11 @@ if [ "$BLOCKING" = "true" ]; then
   if grep -qE "\[SEVERITY: (BLOCKER|HIGH)\]" "$REVIEW_FILE" 2>/dev/null; then
     echo "✗ Blocking issues found in review — failing build"
     cat "$REVIEW_FILE"
-    rm -f "$REVIEW_FILE" "$DIFF_FILE" "$PAYLOAD_FILE"
+    rm -f "$REVIEW_FILE" "$DIFF_FILE" "$PAYLOAD_FILE" "$RESPONSE_FILE"
     exit 1
   fi
 fi
 
-rm -f "$REVIEW_FILE" "$DIFF_FILE" "$PAYLOAD_FILE"
+rm -f "$REVIEW_FILE" "$DIFF_FILE" "$PAYLOAD_FILE" "$RESPONSE_FILE"
 echo "=== Code review complete ==="
 exit 0
