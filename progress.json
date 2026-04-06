@@ -2,7 +2,7 @@
     "project":  "generic-cicd",
     "branch":  "feat/generic-cicd-pipeline",
     "base":  "main",
-    "updated":  "2026-04-07",
+    "updated":  "2026-04-06",
     "phases":  [
                    {
                        "id":  "phase-1",
@@ -53,8 +53,8 @@
                                          "id":  "2.2",
                                          "title":  "Bitbucket pipeline template",
                                          "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
+                                         "status":  "completed",
+                                         "notes":  "bitbucket/pipeline-template.yml + bitbucket/example-caller.yml created; definitions with lint/security-scan/test/build/code-review/deploy-preview steps, pull-requests trigger on **"
                                      },
                                      {
                                          "id":  "2.V",
