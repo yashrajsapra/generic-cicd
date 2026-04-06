@@ -95,16 +95,21 @@ with open(payload_file, "w") as f:
     json.dump(payload, f)
 PYEOF
 
-curl -sf https://api.anthropic.com/v1/messages \
+HTTP_CODE=$(curl -s -w "%{http_code}" \
   -H "x-api-key: ${ANTHROPIC_API_KEY}" \
   -H "anthropic-version: 2023-06-01" \
   -H "content-type: application/json" \
   -d @"${PAYLOAD_FILE}" \
-  -o "$RESPONSE_FILE" 2>/dev/null || {
-  echo "⚠ Anthropic API call failed — skipping review"
+  -o "$RESPONSE_FILE" \
+  "https://api.anthropic.com/v1/messages" 2>/dev/null) || HTTP_CODE="000"
+
+if [ -z "$HTTP_CODE" ] || [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ] 2>/dev/null; then
+  echo "⚠ Anthropic API returned HTTP ${HTTP_CODE} — skipping review"
+  # Log error body (may contain useful info; API key not in response)
+  cat "$RESPONSE_FILE" 2>/dev/null | head -5 || true
   rm -f "$DIFF_FILE" "$PAYLOAD_FILE" "$RESPONSE_FILE"
   exit 0
-}
+fi
 
 # Extract text from response — Python reads from file (avoids embedding JSON in Python source)
 python3 - "$RESPONSE_FILE" "$REVIEW_FILE" <<'PYEOF'
