@@ -19,19 +19,21 @@ if command -v gitleaks &>/dev/null; then
     || { echo "Secrets detected -- review gitleaks output above"; SCAN_FAILED=1; }
 else
   echo "gitleaks not installed -- installing..."
-  if command -v apt-get &>/dev/null; then
-    apt-get update -qq && apt-get install -y -qq gitleaks 2>/dev/null \
-      && gitleaks detect --source "$REPO_ROOT" --no-banner --exit-code 1 \
-      || echo "gitleaks install failed -- skipping secret scan"
-  else
-    echo "Cannot auto-install gitleaks -- skipping secret scan"
-  fi
+  echo "Installing gitleaks from GitHub releases..."
+  GITLEAKS_VERSION="8.18.4"
+  curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+    -o /tmp/gitleaks.tar.gz 2>/dev/null \
+    && tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks 2>/dev/null \
+    && chmod +x /tmp/gitleaks \
+    && /tmp/gitleaks detect --source "$REPO_ROOT" --no-banner --exit-code 1 \
+    && echo "✓ No secrets detected" \
+    || echo "⚠ gitleaks install or scan failed — skipping secret scan"
 fi
 
 # --- Dependency audit ---
 echo ""
 echo "--- Dependency Audit ---"
-STACK="$("/detect-stack.sh")"
+STACK="$(scripts/detect-stack.sh)"
 echo "Detected stack: $STACK"
 
 case "$STACK" in
@@ -42,7 +44,7 @@ import json, sys
 data = json.load(sys.stdin)
 vulns = data.get('metadata', {}).get('vulnerabilities', {})
 high = vulns.get('high', 0) + vulns.get('critical', 0)
-print(f'Vulnerabilities -- high: {high}, moderate: {vulns.get(chr(34)+\"moderate\"+chr(34),0)}, low: {vulns.get(chr(34)+\"low\"+chr(34),0)}')
+print(f'Vulnerabilities -- high: {high}, moderate: {vulns.get(chr(34)+chr(109)+chr(111)+chr(100)+chr(101)+chr(114)+chr(97)+chr(116)+chr(101)+chr(34),0)}, low: {vulns.get(chr(34)+chr(108)+chr(111)+chr(119)+chr(34),0)}')
 sys.exit(1 if high > 0 else 0)
 " || { echo "High/critical npm vulnerabilities found"; SCAN_FAILED=1; }
     else
