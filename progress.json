@@ -6,7 +6,7 @@
     "phases":  [
                    {
                        "id":  "phase-1",
-                       "name":  "Foundation Ã¢â‚¬â€ Scripts + Provider Abstraction",
+                       "name":  "Foundation ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Scripts + Provider Abstraction",
                        "tasks":  [
                                      {
                                          "id":  "1.1",
@@ -31,10 +31,10 @@
                                      },
                                      {
                                          "id":  "1.V",
-                                         "title":  "VERIFY: Phase 1 Ã¢â‚¬â€ Foundation",
+                                         "title":  "VERIFY: Phase 1 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Foundation",
                                          "type":  "verify",
                                          "status":  "completed",
-                                         "notes":  "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1Ã¢â‚¬â€œ1.3 committed on feat/generic-cicd-pipeline."
+                                         "notes":  "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“1.3 committed on feat/generic-cicd-pipeline."
                                      }
                                  ]
                    },
@@ -58,10 +58,10 @@
                                      },
                                      {
                                          "id":  "2.V",
-                                         "title":  "VERIFY: Phase 2 Ã¢â‚¬â€ Provider Workflows",
+                                         "title":  "VERIFY: Phase 2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Provider Workflows",
                                          "type":  "verify",
                                          "status":  "completed",
-                                         "notes":  "yamllint: style warnings only (line-length, document-start, truthy) â€” no structural errors; yaml.safe_load_all confirms all 4 files parse as valid YAML. Line counts: github/cicd-pipeline.yml=103, bitbucket/pipeline-template.yml=63, github/example-caller.yml=14, bitbucket/example-caller.yml=34"
+                                         "notes":  "yamllint: style warnings only (line-length, document-start, truthy) Ã¢â‚¬â€ no structural errors; yaml.safe_load_all confirms all 4 files parse as valid YAML. Line counts: github/cicd-pipeline.yml=103, bitbucket/pipeline-template.yml=63, github/example-caller.yml=14, bitbucket/example-caller.yml=34"
                                      }
                                  ]
                    },
@@ -85,7 +85,7 @@
                                      },
                                      {
                                          "id":  "3.V",
-                                         "title":  "VERIFY: Phase 3 Ã¢â‚¬â€ Core Stages",
+                                         "title":  "VERIFY: Phase 3 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Core Stages",
                                          "type":  "verify",
                                          "status":  "completed",
                                          "notes":  "All 5 checks passed: (1) detect-stack syntax OK, (2) security-scan syntax OK, (3) detect-provider outputs \u0027github\u0027 with GITHUB_ACTIONS=true, (4) detect-stack from node dir outputs \u0027node\u0027, (5) detect-stack --command test outputs \u0027npm test\u0027. YAML: github/cicd-pipeline.yml and bitbucket/pipeline-template.yml both parse as valid YAML. Fixed LF/BOM issues via .gitattributes."
@@ -112,10 +112,10 @@
                                      },
                                      {
                                          "id":  "4.V",
-                                         "title":  "VERIFY: Phase 4 Ã¢â‚¬â€ Code Review",
+                                         "title":  "VERIFY: Phase 4 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Code Review",
                                          "type":  "verify",
-                                         "status":  "pending",
-                                         "notes":  ""
+                                         "status":  "completed",
+                                         "notes":  "V1: bash -n scripts/code-review.sh exit 0 — syntax OK. V2: graceful skip confirmed — \u0027ANTHROPIC_API_KEY not set — skipping code review stage\u0027 output, exit 0. V3: blocking grep pattern confirmed at line 93 — grep -qE \"\\[SEVERITY: (BLOCKER|HIGH)\\]\". V4: python3 yaml.safe_load_all — github/cicd-pipeline.yml OK (1 doc), bitbucket/pipeline-template.yml OK (1 doc)."
                                      }
                                  ]
                    },
@@ -139,7 +139,7 @@
                                      },
                                      {
                                          "id":  "5.V",
-                                         "title":  "VERIFY: Phase 5 Ã¢â‚¬â€ End-to-End",
+                                         "title":  "VERIFY: Phase 5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â End-to-End",
                                          "type":  "verify",
                                          "status":  "pending",
                                          "notes":  ""
