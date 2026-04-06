@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # Detect the project stack and optionally return the default command for a stage.
 # Usage:
 #   detect-stack.sh              -> outputs: node | python | go | dotnet | unknown
