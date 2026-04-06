@@ -1,0 +1,25 @@
+# Copy to bitbucket-pipelines.yml in your repo.
+# Set repo vars: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+# Docs: https://github.com/yashrajsapra/generic-cicd
+
+image: ubuntu:22.04
+
+pull-requests:
+  '**':
+    - parallel:
+        - step:
+            name: Lint
+            script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command lint); scripts/run-stage.sh lint "$CMD"' ]
+        - step:
+            name: Security Scan
+            script: [ chmod +x scripts/*.sh, scripts/security-scan.sh ]
+    - step:
+        name: Test
+        script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command test); scripts/run-stage.sh test "$CMD"' ]
+    - step:
+        name: Build
+        script: [ chmod +x scripts/*.sh, bash -c 'CMD=$(scripts/detect-stack.sh --command build); scripts/run-stage.sh build "$CMD"' ]
+    - step:
+        name: Code Review
+        image: node:20
+        script: [ npm i -g @anthropic-ai/claude-code -q, chmod +x scripts/*.sh, export PR_NUMBER=$BITBUCKET_PR_ID, scripts/code-review.sh ]
