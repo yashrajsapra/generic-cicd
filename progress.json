@@ -73,8 +73,8 @@
                                          "id":  "3.1",
                                          "title":  "Lint, Test, Build stages",
                                          "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
+                                         "status":  "completed",
+                                         "notes":  "detect-stack.sh extended with --command flag; lint/test/build jobs in both github/cicd-pipeline.yml and bitbucket/pipeline-template.yml wired with STACK_CMD/CONFIG_CMD/CMD resolution pattern"
                                      },
                                      {
                                          "id":  "3.2",
