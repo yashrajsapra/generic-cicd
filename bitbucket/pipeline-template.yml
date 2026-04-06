@@ -9,19 +9,16 @@ definitions:
         name: Lint
         image: ubuntu:22.04
         script:
-          - apt-get update -qq && apt-get install -y -qq python3 python3-pip
           - chmod +x scripts/*.sh
-          - |
-            STACK_CMD=$(scripts/detect-stack.sh --command lint)
-            CONFIG_CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || true)
-            CMD=${CONFIG_CMD:-$STACK_CMD}
-            scripts/run-stage.sh lint "$CMD"
+          - STACK_CMD=$(scripts/detect-stack.sh --command lint)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh lint "$CMD"
 
     - step: &security-scan
         name: Security Scan
         image: ubuntu:22.04
         script:
-          - apt-get update -qq && apt-get install -y -qq curl python3 python3-pip
           - chmod +x scripts/*.sh
           - scripts/security-scan.sh
 
@@ -30,22 +27,20 @@ definitions:
         image: ubuntu:22.04
         script:
           - chmod +x scripts/*.sh
-          - |
-            STACK_CMD=$(scripts/detect-stack.sh --command test)
-            CONFIG_CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || true)
-            CMD=${CONFIG_CMD:-$STACK_CMD}
-            scripts/run-stage.sh test "$CMD"
+          - STACK_CMD=$(scripts/detect-stack.sh --command test)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh test "$CMD"
 
     - step: &build
         name: Build
         image: ubuntu:22.04
         script:
           - chmod +x scripts/*.sh
-          - |
-            STACK_CMD=$(scripts/detect-stack.sh --command build)
-            CONFIG_CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || true)
-            CMD=${CONFIG_CMD:-$STACK_CMD}
-            scripts/run-stage.sh build "$CMD"
+          - STACK_CMD=$(scripts/detect-stack.sh --command build)
+          - CONFIG_CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || true)
+          - CMD=${CONFIG_CMD:-$STACK_CMD}
+          - scripts/run-stage.sh build "$CMD"
 
     - step: &code-review
         name: Code Review
@@ -64,9 +59,12 @@ definitions:
         name: Deploy Preview
         image: ubuntu:22.04
         trigger: manual
+        # Set stages.deploy-preview.command in .cicd/config.yml to enable
         script:
           - chmod +x scripts/*.sh
-          - scripts/run-stage.sh deploy-preview "$(scripts/load-config.sh stages.deploy-preview.command)"
+          - DEPLOY_CMD=$(scripts/load-config.sh stages.deploy-preview.command 2>/dev/null || echo "")
+          - if [ -z "$DEPLOY_CMD" ]; then echo "deploy-preview.command not set"; exit 0; fi
+          - scripts/run-stage.sh deploy-preview "$DEPLOY_CMD"
 
 pull-requests:
   '**':

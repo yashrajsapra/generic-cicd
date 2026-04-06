@@ -1,0 +1,45 @@
+# Generic CI/CD Pipeline - Configuration Reference
+# Place this file at .cicd/config.yml in your repo to customize behavior.
+# All settings are optional -- the pipeline works with zero configuration.
+
+stages:
+  lint:
+    enabled: true
+    command: ""          # Default: auto-detected per stack (npm run lint / flake8 / golangci-lint / dotnet format)
+
+  test:
+    enabled: true
+    command: ""          # Default: auto-detected per stack (npm test / pytest / go test ./... / dotnet test)
+
+  build:
+    enabled: true
+    command: ""          # Default: auto-detected per stack (npm run build / python -m build / go build / dotnet build)
+
+  security-scan:
+    enabled: true        # Runs gitleaks + stack-appropriate dependency audit
+
+  code-review:
+    enabled: true
+    blocking: false      # Set to true to fail the PR if BLOCKER or HIGH issues are found
+    # Requires ANTHROPIC_API_KEY secret. Silently skipped if not set.
+
+  deploy-preview:
+    enabled: false
+    command: ""          # e.g. "vercel --token $VERCEL_TOKEN" or "fly deploy --app myapp-pr-$PR_NUMBER"
+
+# Hook scripts -- optional, run before/after each stage
+# Create the referenced files in your repo to use them
+hooks:
+  lint.pre:         ".cicd/hooks/lint.pre.sh"
+  lint.post:        ".cicd/hooks/lint.post.sh"
+  test.pre:         ".cicd/hooks/test.pre.sh"
+  test.post:        ".cicd/hooks/test.post.sh"
+  build.pre:        ".cicd/hooks/build.pre.sh"
+  build.post:       ".cicd/hooks/build.post.sh"
+  deploy-preview.pre:  ".cicd/hooks/deploy-preview.pre.sh"
+  deploy-preview.post: ".cicd/hooks/deploy-preview.post.sh"
+
+# Environment variables injected into all stages
+env:
+  NODE_ENV: "test"
+  # Add any other env vars your stages need
