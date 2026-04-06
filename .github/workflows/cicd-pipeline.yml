@@ -1,4 +1,4 @@
-﻿# GitHub Reusable Workflow - generic-cicd
+# GitHub Reusable Workflow - generic-cicd
 # Callers reference this as:
 #   uses: yashrajsapra/generic-cicd/.github/workflows/cicd-pipeline.yml@main
 # (This file is also copied to .github/workflows/cicd-pipeline.yml in this repo
@@ -97,8 +97,6 @@ jobs:
     continue-on-error: ${{ inputs.blocking == false }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install claude CLI
-        run: npm install -g @anthropic-ai/claude-code --quiet
       - name: Run code review
         env:
           CONFIG_PATH: ${{ inputs.config-path }}
