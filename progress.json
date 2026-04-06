@@ -1,150 +1,150 @@
 {
-    "project":  "generic-cicd",
-    "branch":  "feat/generic-cicd-pipeline",
-    "base":  "main",
-    "updated":  "2026-04-06",
-    "phases":  [
-                   {
-                       "id":  "phase-1",
-                       "name":  "Foundation ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Scripts + Provider Abstraction",
-                       "tasks":  [
-                                     {
-                                         "id":  "1.1",
-                                         "title":  "Repo skeleton + provider detection",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "detect-provider.sh + detect-stack.sh created, chmod+x, README added"
-                                     },
-                                     {
-                                         "id":  "1.2",
-                                         "title":  "Config loader",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "scripts/load-config.sh (yq + python3/PyYAML fallback deep-merge), config/defaults.yml committed"
-                                     },
-                                     {
-                                         "id":  "1.3",
-                                         "title":  "Stage runner + PR abstraction layer",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "scripts/run-stage.sh (pre/post hooks, exit-code passthrough), scripts/pr-diff.sh (gh/BB curl), scripts/pr-comment.sh (gh pr comment/BB REST POST)"
-                                     },
-                                     {
-                                         "id":  "1.V",
-                                         "title":  "VERIFY: Phase 1 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Foundation",
-                                         "type":  "verify",
-                                         "status":  "completed",
-                                         "notes":  "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“1.3 committed on feat/generic-cicd-pipeline."
-                                     }
-                                 ]
-                   },
-                   {
-                       "id":  "phase-2",
-                       "name":  "Provider Workflow Files",
-                       "tasks":  [
-                                     {
-                                         "id":  "2.1",
-                                         "title":  "GitHub reusable workflow",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "github/cicd-pipeline.yml + .github/workflows/cicd-pipeline.yml (copy) + github/example-caller.yml created; reusable workflow_call with lint/security-scan/test/build/code-review/deploy-preview jobs"
-                                     },
-                                     {
-                                         "id":  "2.2",
-                                         "title":  "Bitbucket pipeline template",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "bitbucket/pipeline-template.yml + bitbucket/example-caller.yml created; definitions with lint/security-scan/test/build/code-review/deploy-preview steps, pull-requests trigger on **"
-                                     },
-                                     {
-                                         "id":  "2.V",
-                                         "title":  "VERIFY: Phase 2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Provider Workflows",
-                                         "type":  "verify",
-                                         "status":  "completed",
-                                         "notes":  "yamllint: style warnings only (line-length, document-start, truthy) Ã¢â‚¬â€ no structural errors; yaml.safe_load_all confirms all 4 files parse as valid YAML. Line counts: github/cicd-pipeline.yml=103, bitbucket/pipeline-template.yml=63, github/example-caller.yml=14, bitbucket/example-caller.yml=34"
-                                     }
-                                 ]
-                   },
-                   {
-                       "id":  "phase-3",
-                       "name":  "Core CI Stages",
-                       "tasks":  [
-                                     {
-                                         "id":  "3.1",
-                                         "title":  "Lint, Test, Build stages",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "detect-stack.sh extended with --command flag; lint/test/build jobs in both github/cicd-pipeline.yml and bitbucket/pipeline-template.yml wired with STACK_CMD/CONFIG_CMD/CMD resolution pattern"
-                                     },
-                                     {
-                                         "id":  "3.2",
-                                         "title":  "Security scan stage",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "scripts/security-scan.sh created: gitleaks secret scanning (auto-install via apt-get fallback) + stack-aware dependency audit (npm audit/pip-audit/go mod verify/dotnet list package --vulnerable); non-fatal on missing tools"
-                                     },
-                                     {
-                                         "id":  "3.V",
-                                         "title":  "VERIFY: Phase 3 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Core Stages",
-                                         "type":  "verify",
-                                         "status":  "completed",
-                                         "notes":  "All 5 checks passed: (1) detect-stack syntax OK, (2) security-scan syntax OK, (3) detect-provider outputs \u0027github\u0027 with GITHUB_ACTIONS=true, (4) detect-stack from node dir outputs \u0027node\u0027, (5) detect-stack --command test outputs \u0027npm test\u0027. YAML: github/cicd-pipeline.yml and bitbucket/pipeline-template.yml both parse as valid YAML. Fixed LF/BOM issues via .gitattributes."
-                                     }
-                                 ]
-                   },
-                   {
-                       "id":  "phase-4",
-                       "name":  "Code Review Stage",
-                       "tasks":  [
-                                     {
-                                         "id":  "4.1",
-                                         "title":  "Code review script (claude + gstack-review)",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "scripts/code-review.sh created: guards for missing ANTHROPIC_API_KEY/PR_NUMBER, fetches diff via pr-diff.sh, truncates at MAX_DIFF_CHARS, runs claude -p --output-format text, posts via pr-comment.sh, BLOCKING mode exits 1 on BLOCKER/HIGH severity"
-                                     },
-                                     {
-                                         "id":  "4.2",
-                                         "title":  "Wire code review into both providers",
-                                         "type":  "work",
-                                         "status":  "completed",
-                                         "notes":  "GitHub: added \u0027blocking\u0027 input (boolean, default false), npm install -g @anthropic-ai/claude-code step, BLOCKING env var, continue-on-error driven by inputs.blocking. Bitbucket: added env-var comment block, set PR_NUMBER=BITBUCKET_PR_ID. Synced to .github/workflows/cicd-pipeline.yml."
-                                     },
-                                     {
-                                         "id":  "4.V",
-                                         "title":  "VERIFY: Phase 4 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Code Review",
-                                         "type":  "verify",
-                                         "status":  "completed",
-                                         "notes":  "V1: bash -n scripts/code-review.sh exit 0 — syntax OK. V2: graceful skip confirmed — \u0027ANTHROPIC_API_KEY not set — skipping code review stage\u0027 output, exit 0. V3: blocking grep pattern confirmed at line 93 — grep -qE \"\\[SEVERITY: (BLOCKER|HIGH)\\]\". V4: python3 yaml.safe_load_all — github/cicd-pipeline.yml OK (1 doc), bitbucket/pipeline-template.yml OK (1 doc)."
-                                     }
-                                 ]
-                   },
-                   {
-                       "id":  "phase-5",
-                       "name":  "Extensibility + Documentation",
-                       "tasks":  [
-                                     {
-                                         "id":  "5.1",
-                                         "title":  "Deploy-preview stage + hook finalization",
-                                         "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
-                                     },
-                                     {
-                                         "id":  "5.2",
-                                         "title":  "Caller templates + full docs",
-                                         "type":  "work",
-                                         "status":  "pending",
-                                         "notes":  ""
-                                     },
-                                     {
-                                         "id":  "5.V",
-                                         "title":  "VERIFY: Phase 5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â End-to-End",
-                                         "type":  "verify",
-                                         "status":  "pending",
-                                         "notes":  ""
-                                     }
-                                 ]
-                   }
-               ]
+    "project": "generic-cicd",
+    "branch": "feat/generic-cicd-pipeline",
+    "base": "main",
+    "updated": "2026-04-06",
+    "phases": [
+        {
+            "id": "phase-1",
+            "name": "Foundation ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Scripts + Provider Abstraction",
+            "tasks": [
+                {
+                    "id": "1.1",
+                    "title": "Repo skeleton + provider detection",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "detect-provider.sh + detect-stack.sh created, chmod+x, README added"
+                },
+                {
+                    "id": "1.2",
+                    "title": "Config loader",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "scripts/load-config.sh (yq + python3/PyYAML fallback deep-merge), config/defaults.yml committed"
+                },
+                {
+                    "id": "1.3",
+                    "title": "Stage runner + PR abstraction layer",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "scripts/run-stage.sh (pre/post hooks, exit-code passthrough), scripts/pr-diff.sh (gh/BB curl), scripts/pr-comment.sh (gh pr comment/BB REST POST)"
+                },
+                {
+                    "id": "1.V",
+                    "title": "VERIFY: Phase 1 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Foundation",
+                    "type": "verify",
+                    "status": "completed",
+                    "notes": "All 6 scripts present and chmod+x: detect-provider.sh, detect-stack.sh, load-config.sh, run-stage.sh, pr-diff.sh, pr-comment.sh. Tasks 1.1ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“1.3 committed on feat/generic-cicd-pipeline."
+                }
+            ]
+        },
+        {
+            "id": "phase-2",
+            "name": "Provider Workflow Files",
+            "tasks": [
+                {
+                    "id": "2.1",
+                    "title": "GitHub reusable workflow",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "github/cicd-pipeline.yml + .github/workflows/cicd-pipeline.yml (copy) + github/example-caller.yml created; reusable workflow_call with lint/security-scan/test/build/code-review/deploy-preview jobs"
+                },
+                {
+                    "id": "2.2",
+                    "title": "Bitbucket pipeline template",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "bitbucket/pipeline-template.yml + bitbucket/example-caller.yml created; definitions with lint/security-scan/test/build/code-review/deploy-preview steps, pull-requests trigger on **"
+                },
+                {
+                    "id": "2.V",
+                    "title": "VERIFY: Phase 2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Provider Workflows",
+                    "type": "verify",
+                    "status": "completed",
+                    "notes": "yamllint: style warnings only (line-length, document-start, truthy) Ã¢â‚¬â€ no structural errors; yaml.safe_load_all confirms all 4 files parse as valid YAML. Line counts: github/cicd-pipeline.yml=103, bitbucket/pipeline-template.yml=63, github/example-caller.yml=14, bitbucket/example-caller.yml=34"
+                }
+            ]
+        },
+        {
+            "id": "phase-3",
+            "name": "Core CI Stages",
+            "tasks": [
+                {
+                    "id": "3.1",
+                    "title": "Lint, Test, Build stages",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "detect-stack.sh extended with --command flag; lint/test/build jobs in both github/cicd-pipeline.yml and bitbucket/pipeline-template.yml wired with STACK_CMD/CONFIG_CMD/CMD resolution pattern"
+                },
+                {
+                    "id": "3.2",
+                    "title": "Security scan stage",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "scripts/security-scan.sh created: gitleaks secret scanning (auto-install via apt-get fallback) + stack-aware dependency audit (npm audit/pip-audit/go mod verify/dotnet list package --vulnerable); non-fatal on missing tools"
+                },
+                {
+                    "id": "3.V",
+                    "title": "VERIFY: Phase 3 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Core Stages",
+                    "type": "verify",
+                    "status": "completed",
+                    "notes": "All 5 checks passed: (1) detect-stack syntax OK, (2) security-scan syntax OK, (3) detect-provider outputs 'github' with GITHUB_ACTIONS=true, (4) detect-stack from node dir outputs 'node', (5) detect-stack --command test outputs 'npm test'. YAML: github/cicd-pipeline.yml and bitbucket/pipeline-template.yml both parse as valid YAML. Fixed LF/BOM issues via .gitattributes."
+                }
+            ]
+        },
+        {
+            "id": "phase-4",
+            "name": "Code Review Stage",
+            "tasks": [
+                {
+                    "id": "4.1",
+                    "title": "Code review script (claude + gstack-review)",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "scripts/code-review.sh created: guards for missing ANTHROPIC_API_KEY/PR_NUMBER, fetches diff via pr-diff.sh, truncates at MAX_DIFF_CHARS, runs claude -p --output-format text, posts via pr-comment.sh, BLOCKING mode exits 1 on BLOCKER/HIGH severity"
+                },
+                {
+                    "id": "4.2",
+                    "title": "Wire code review into both providers",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "GitHub: added 'blocking' input (boolean, default false), npm install -g @anthropic-ai/claude-code step, BLOCKING env var, continue-on-error driven by inputs.blocking. Bitbucket: added env-var comment block, set PR_NUMBER=BITBUCKET_PR_ID. Synced to .github/workflows/cicd-pipeline.yml."
+                },
+                {
+                    "id": "4.V",
+                    "title": "VERIFY: Phase 4 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Code Review",
+                    "type": "verify",
+                    "status": "completed",
+                    "notes": "V1: bash -n scripts/code-review.sh exit 0 — syntax OK. V2: graceful skip confirmed — 'ANTHROPIC_API_KEY not set — skipping code review stage' output, exit 0. V3: blocking grep pattern confirmed at line 93 — grep -qE \"\\[SEVERITY: (BLOCKER|HIGH)\\]\". V4: python3 yaml.safe_load_all — github/cicd-pipeline.yml OK (1 doc), bitbucket/pipeline-template.yml OK (1 doc)."
+                }
+            ]
+        },
+        {
+            "id": "phase-5",
+            "name": "Extensibility + Documentation",
+            "tasks": [
+                {
+                    "id": "5.1",
+                    "title": "Deploy-preview stage + hook finalization",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "deploy-preview job updated in github/cicd-pipeline.yml (load-config + run-stage pattern, skip-if-not-configured); bitbucket deploy-preview step updated with same pattern; .cicd/config.yml.example created; docs/adding-stages.md created"
+                },
+                {
+                    "id": "5.2",
+                    "title": "Caller templates + full docs",
+                    "type": "work",
+                    "status": "completed",
+                    "notes": "bitbucket/example-caller.yml trimmed to 25 lines; docs/quickstart-github.md, docs/quickstart-bitbucket.md, docs/customization.md created; README.md rewritten with ASCII graph, quick-start table, links, secrets table"
+                },
+                {
+                    "id": "5.V",
+                    "title": "VERIFY: Phase 5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â End-to-End",
+                    "type": "verify",
+                    "status": "pending",
+                    "notes": ""
+                }
+            ]
+        }
+    ]
 }
