@@ -1,4 +1,4 @@
-﻿# GitHub Reusable Workflow - generic-cicd
+# GitHub Reusable Workflow - generic-cicd
 # Callers reference this as:
 #   uses: yashrajsapra/generic-cicd/.github/workflows/cicd-pipeline.yml@main
 # (This file is also copied to .github/workflows/cicd-pipeline.yml in this repo
@@ -14,6 +14,9 @@ on:
         type: string
         default: '.cicd/config.yml'
       deploy-preview-enabled:
+        type: boolean
+        default: false
+      blocking:
         type: boolean
         default: false
     secrets:
@@ -85,14 +88,17 @@ jobs:
   code-review:
     runs-on: ubuntu-latest
     needs: [build]
-    continue-on-error: true
+    continue-on-error: ${{ inputs.blocking == false }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install claude CLI
+        run: npm install -g @anthropic-ai/claude-code --quiet
       - name: Run code review
         env:
           CONFIG_PATH: ${{ inputs.config-path }}
           PR_NUMBER: ${{ inputs.pr-number }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BLOCKING: ${{ inputs.blocking }}
         run: scripts/code-review.sh
 
   deploy-preview:

@@ -1,4 +1,4 @@
-﻿# Generic CI/CD Pipeline - Bitbucket Pipelines Template
+# Generic CI/CD Pipeline - Bitbucket Pipelines Template
 # Triggered on all pull requests. Import this via your bitbucket-pipelines.yml.
 # Required repository variables: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
 # Optional: CICD_CONFIG_PATH (default: .cicd/config.yml)
@@ -50,9 +50,12 @@ definitions:
     - step: &code-review
         name: Code Review
         image: node:20
+        # Required repo vars: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+        # Optional: BLOCKING=true to fail build on high-severity issues
         script:
           - npm install -g @anthropic-ai/claude-code --quiet
           - chmod +x scripts/*.sh
+          - export PR_NUMBER=$BITBUCKET_PR_ID
           - scripts/code-review.sh
         after-script:
           - echo "Code review complete (non-blocking by default)"
