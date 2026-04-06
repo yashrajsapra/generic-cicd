@@ -1,0 +1,63 @@
+﻿# Generic CI/CD Pipeline — Bitbucket Pipelines Template
+# Triggered on all pull requests. Import this via your bitbucket-pipelines.yml.
+# Required repository variables: ANTHROPIC_API_KEY, BB_USER, BB_TOKEN
+# Optional: CICD_CONFIG_PATH (default: .cicd/config.yml)
+
+definitions:
+  steps:
+    - step: &lint
+        name: Lint
+        image: ubuntu:22.04
+        script:
+          - apt-get update -qq && apt-get install -y -qq python3 python3-pip
+          - chmod +x scripts/*.sh
+          - scripts/run-stage.sh lint "$(scripts/load-config.sh stages.lint.command 2>/dev/null || scripts/detect-stack.sh --command lint)"
+
+    - step: &security-scan
+        name: Security Scan
+        image: ubuntu:22.04
+        script:
+          - apt-get update -qq && apt-get install -y -qq curl python3 python3-pip
+          - chmod +x scripts/*.sh
+          - scripts/security-scan.sh
+
+    - step: &test
+        name: Test
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - scripts/run-stage.sh test "$(scripts/load-config.sh stages.test.command 2>/dev/null || scripts/detect-stack.sh --command test)"
+
+    - step: &build
+        name: Build
+        image: ubuntu:22.04
+        script:
+          - chmod +x scripts/*.sh
+          - scripts/run-stage.sh build "$(scripts/load-config.sh stages.build.command 2>/dev/null || scripts/detect-stack.sh --command build)"
+
+    - step: &code-review
+        name: Code Review
+        image: node:20
+        script:
+          - npm install -g @anthropic-ai/claude-code --quiet
+          - chmod +x scripts/*.sh
+          - scripts/code-review.sh
+        after-script:
+          - echo "Code review complete (non-blocking by default)"
+
+    - step: &deploy-preview
+        name: Deploy Preview
+        image: ubuntu:22.04
+        trigger: manual
+        script:
+          - chmod +x scripts/*.sh
+          - scripts/run-stage.sh deploy-preview "$(scripts/load-config.sh stages.deploy-preview.command)"
+
+pull-requests:
+  '**':
+    - parallel:
+        - step: *lint
+        - step: *security-scan
+    - step: *test
+    - step: *build
+    - step: *code-review
