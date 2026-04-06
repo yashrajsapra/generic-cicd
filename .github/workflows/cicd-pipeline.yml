@@ -1,0 +1,103 @@
+﻿# GitHub Reusable Workflow — generic-cicd
+# Callers reference this as:
+#   uses: yashrajsapra/generic-cicd/.github/workflows/cicd-pipeline.yml@main
+# (This file is also copied to .github/workflows/cicd-pipeline.yml in this repo
+#  so GitHub can serve it as a callable reusable workflow.)
+
+on:
+  workflow_call:
+    inputs:
+      pr-number:
+        type: number
+        required: true
+      config-path:
+        type: string
+        default: '.cicd/config.yml'
+      deploy-preview-enabled:
+        type: boolean
+        default: false
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: false
+      BB_USER:
+        required: false
+      BB_TOKEN:
+        required: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lint stage
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CMD=$(scripts/load-config.sh stages.lint.command 2>/dev/null || scripts/detect-stack.sh lint)
+          scripts/run-stage.sh lint "$CMD"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run security scan
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+        run: scripts/security-scan.sh
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run test stage
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CMD=$(scripts/load-config.sh stages.test.command 2>/dev/null || scripts/detect-stack.sh test)
+          scripts/run-stage.sh test "$CMD"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run build stage
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CMD=$(scripts/load-config.sh stages.build.command 2>/dev/null || scripts/detect-stack.sh build)
+          scripts/run-stage.sh build "$CMD"
+
+  code-review:
+    runs-on: ubuntu-latest
+    needs: [build]
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run code review
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: scripts/code-review.sh
+
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: [code-review]
+    if: ${{ inputs.deploy-preview-enabled == true }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run deploy preview
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: scripts/deploy-preview.sh

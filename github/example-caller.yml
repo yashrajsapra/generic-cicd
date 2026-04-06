@@ -1,0 +1,14 @@
+﻿# Copy this file to .github/workflows/pr.yml in your repo to use generic-cicd.
+name: PR Pipeline
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  cicd:
+    uses: yashrajsapra/generic-cicd/.github/workflows/cicd-pipeline.yml@main
+    with:
+      pr-number: ${{ github.event.pull_request.number }}
+      config-path: .cicd/config.yml
+      deploy-preview-enabled: false
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
