@@ -1,0 +1,12 @@
+name: PR Pipeline
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  pipeline:
+    uses: ./.github/workflows/cicd-pipeline.yml
+    with:
+      pr-number: ${{ github.event.number }}
+      blocking: false
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
