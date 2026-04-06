@@ -141,8 +141,8 @@
                     "id": "5.V",
                     "title": "VERIFY: Phase 5 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â End-to-End",
                     "type": "verify",
-                    "status": "pending",
-                    "notes": ""
+                    "status": "completed",
+                    "notes": "V1: github/example-caller.yml=14 lines (<=20) PASS. V2: bitbucket/example-caller.yml=25 lines (<=25) PASS. V3: bash -n OK on all 8 scripts/*.sh. V4: python3 yaml.safe_load_all OK on github/cicd-pipeline.yml and bitbucket/pipeline-template.yml. V5: 26 tracked files listed."
                 }
             ]
         }
